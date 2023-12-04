@@ -20,45 +20,70 @@ El código se organiza en varias secciones clave:
 ## Codigo Boton Start
 
 ```kotlin
-@Composable
-fun BotonStart() {
-    Button(
-        onClick = {
-            start = true
-            aux()
-        },
-        modifier = Modifier
-            .padding(10.dp)
-            .fillMaxWidth(),
-        colors = ButtonDefaults.buttonColors(
-            backgroundColor = Color(0xFFBB86FC)
-        )
-    ) {
-        Text(text = "Start")
+fun iniciarJuego() {
+    juegoIniciado = true
+    fraseActual.value = frases.random() // Selecciona una frase aleatoria
+    scope.launch {
+        repeat(20) {
+            delay(1000)
+            CuentaAtras--
+        }
+        juegoIniciado = false
     }
+}
+
+@Composable
+Button(
+    onClick = {
+        if (!juegoIniciado) {
+            CuentaAtras = 20
+            puntuacion = 0
+            iniciarJuego()
+        }
+    }
+) {
+    Text("START")
 }
 ```
 
 ## Codigo Boton Respuesta
 
 ```kotlin
+
 @Composable
-fun BotonRespuesta(respuesta: Boolean) {
+fun BotonRespuesta(verdadero: Boolean, color: Color) {
     Button(
         onClick = {
-            if (respuesta == respuestaActual) {
+            if (!juegoIniciado) return@Button
+            if (fraseActual.value.verdadero == verdadero) {
+                fraseActual.value = frases.random() // Selecciona una nueva frase correcta
                 puntuacion++
+            } else {
+                fraseActual.value = frases.random() // Selecciona una nueva frase incorrecta
             }
-            aux()
         },
+
         modifier = Modifier
             .padding(10.dp)
-            .fillMaxWidth(),
-        colors = ButtonDefaults.buttonColors(
-            backgroundColor = Color(0xFFBB86FC)
-        )
+            .size(150.dp)
+            .padding(8.dp), // Añadir padding para que se vean mejor los bordes redondeados
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp), // Agregar bordes redondeados
+
+        colors = ButtonDefaults.buttonColors(color)
     ) {
-        Text(text = if (respuesta) "Verdadero" else "Falso")
+        if (verdadero) {
+            Text("V",
+                color = Color.Black,
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 20.sp
+            )
+
+        } else {
+            Text("F",
+                color = Color.Black,
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 20.sp)
+        }
     }
 }
 ```
