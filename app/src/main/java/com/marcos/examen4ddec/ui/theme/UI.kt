@@ -41,18 +41,26 @@ fun aux() {
     frases.add(Frase("una gallina pesa menos que cinco toneladas",true))
 }
 
-@Composable
+
         /**
          * Función de la Grretting
          */
+/**
+ * Composable que representa la pantalla principal del juego.
+ * Esta función contiene la lógica principal del juego y la composición de la interfaz de usuario con Jetpack Compose.
+ */
+@Composable
 fun Greeting() {
 
-    aux() // Llama a la función auxiliar para inicializar las frases
+    // Llama a la función auxiliar para inicializar las frases
+    aux()
 
+    // Scope para el manejo de corrutinas
     val scope = rememberCoroutineScope()
 
     /**
-     * Función para iniciar el juego
+     * Función para iniciar el juego.
+     * Cambia el estado del juego a iniciado, selecciona una frase aleatoria y comienza la cuenta atrás.
      */
     fun iniciarJuego() {
         juegoIniciado = true
@@ -75,12 +83,17 @@ fun Greeting() {
         verticalArrangement = Arrangement.Center
     ) {
         Spacer(modifier = Modifier.height(16.dp))
+
+        // Muestra el contador de cuenta atrás
         Text(
             text = "Count Down: $CuentaAtras",
             style = MaterialTheme.typography.headlineMedium,
             color = Color.Black
         )
+
         Spacer(modifier = Modifier.height(16.dp))
+
+        // Muestra la puntuación actual
         Text(
             text = "Puntuación: $puntuacion",
             style = MaterialTheme.typography.headlineMedium,
@@ -88,13 +101,17 @@ fun Greeting() {
         )
 
         Spacer(modifier = Modifier.height(16.dp))
+
+        // Muestra la frase actual del juego
         Text(
             text = "Frase: ${fraseActual.value.texto}",
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.headlineLarge,
             color = Color.Black
         )
 
         Spacer(modifier = Modifier.height(16.dp))
+
+        // Botones de respuesta (Verdadero o Falso)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
@@ -102,6 +119,8 @@ fun Greeting() {
             BotonRespuesta(verdadero = true, color = Color.Green)
             BotonRespuesta(verdadero = false, color = Color.Red)
         }
+
+        // Botón para iniciar o reiniciar el juego
         Button(
             onClick = {
                 if (!juegoIniciado) {
@@ -111,13 +130,16 @@ fun Greeting() {
                 }
             }
         ) {
-            Text("Start")
+            Text("START")
         }
     }
 }
 
 /**
- * Composición de un botón de respuesta (Verdadero o Falso)
+ * Composable que representa un botón de respuesta (Verdadero o Falso).
+ *
+ * @param verdadero Booleano que indica si el botón representa la respuesta verdadera.
+ * @param color Color del botón.
  */
 @Composable
 fun BotonRespuesta(verdadero: Boolean, color: Color) {
