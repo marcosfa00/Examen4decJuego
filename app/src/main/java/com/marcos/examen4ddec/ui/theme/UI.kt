@@ -1,3 +1,5 @@
+package com.marcos.myaplicationpractica
+
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -8,71 +10,29 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.*
+import com.marcos.examen4ddec.Data
+import com.marcos.examen4ddec.VModel
+
+
+
+
+
+
+
 
 /**
- * Variables globales
- */
-// Para crear los objetos de las frases
-data class Frase(var texto: String, var verdadero: Boolean)
-// Lista para almacenar las frases
-var frases: MutableList<Frase> = mutableListOf()
-// La frase actual
-var fraseActual: MutableState<Frase> = mutableStateOf(Frase("-", true))
-var CuentaAtras by mutableStateOf(20)
-var puntuacion by mutableStateOf(0)
-var juegoIniciado by mutableStateOf(false)
-
-/**
- * Función auxiliar con las frases verdaderas y falsas
- */
-@Composable
-fun aux() {
-    // Introducir frases en la lista
-    frases.add(Frase("el torneo de rugby cinco naciones, ahora es seis naciones",true))
-    frases.add(Frase("en el cielo hay cinco estrellas",false))
-    frases.add(Frase("el dia cinco de diciembre del 2023 es martes",true))
-    frases.add(Frase("cinco más cinco son diez",true))
-    frases.add(Frase("dos mas dos son cinco",false))
-    frases.add(Frase("los elefantes tienen cinco patas",false))
-    frases.add(Frase("las estaciones climáticas son cinco",false))
-    frases.add(Frase("tenemos cinco dedos los humanos",true))
-    frases.add(Frase("cinco días tiene la semana sin el Domingo y el Sábado",true))
-    frases.add(Frase("una gallina pesa menos que cinco toneladas",true))
-}
-
-
-        /**
-         * Función de la Grretting
-         */
-/**
- * Composable que representa la pantalla principal del juego.
- * Esta función contiene la lógica principal del juego y la composición de la interfaz de usuario con Jetpack Compose.
+ * Composable que representa la interfaz de usuario principal del juego.
+ * Muestra el contador de cuenta atrás, la puntuación actual, la frase del juego,
+ * botones de respuesta (Verdadero o Falso) y un botón para iniciar o reiniciar el juego.
+ *
+ * @param miModel El ViewModel asociado para manejar la lógica del juego.
  */
 @Composable
-fun Greeting() {
+fun Greeting(miModel: VModel) {
 
-    // Llama a la función auxiliar para inicializar las frases
-    aux()
-
-    // Scope para el manejo de corrutinas
-    val scope = rememberCoroutineScope()
-
-    /**
-     * Función para iniciar el juego.
-     * Cambia el estado del juego a iniciado, selecciona una frase aleatoria y comienza la cuenta atrás.
-     */
-    fun iniciarJuego() {
-        juegoIniciado = true
-        fraseActual.value = frases.random() // Selecciona una frase aleatoria
-        scope.launch {
-            repeat(20) {
-                delay(1000)
-                CuentaAtras--
-            }
-            juegoIniciado = false
-        }
-    }
+    val cuentaAtras by remember { Data.cuentaAtras }
+    val puntuacion by remember { Data.puntuacion }
+    val fraseActual by remember { Data.fraseActual }
 
     // Composición de la interfaz de usuario con Jetpack Compose
     Column(
@@ -86,7 +46,7 @@ fun Greeting() {
 
         // Muestra el contador de cuenta atrás
         Text(
-            text = "Count Down: $CuentaAtras",
+            text = "Count Down: $cuentaAtras",
             style = MaterialTheme.typography.headlineMedium,
             color = Color.Black
         )
@@ -104,7 +64,7 @@ fun Greeting() {
 
         // Muestra la frase actual del juego
         Text(
-            text = "Frase: ${fraseActual.value.texto}",
+            text = "Frase: ${fraseActual.texto}",
             style = MaterialTheme.typography.headlineLarge,
             color = Color.Black
         )
@@ -116,18 +76,15 @@ fun Greeting() {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            BotonRespuesta(verdadero = true, color = Color.Green)
-            BotonRespuesta(verdadero = false, color = Color.Red)
+            BotonRespuesta(miModel, verdadero = true, color = Color.Green)
+            BotonRespuesta(miModel, verdadero = false, color = Color.Red)
         }
 
         // Botón para iniciar o reiniciar el juego
         Button(
             onClick = {
-                if (!juegoIniciado) {
-                    CuentaAtras = 20
-                    puntuacion = 0
-                    iniciarJuego()
-                }
+                miModel.resetGame()
+                miModel.iniciarJuego()
             }
         ) {
             Text("START")
@@ -135,36 +92,31 @@ fun Greeting() {
     }
 }
 
+
 /**
- * Composable que representa un botón de respuesta (Verdadero o Falso).
+ * Composable que representa un botón de respuesta que puede ser Verdadero (V) o Falso (F).
  *
- * @param verdadero Booleano que indica si el botón representa la respuesta verdadera.
- * @param color Color del botón.
+ * @param miModel El ViewModel asociado para manejar la lógica de la respuesta.
+ * @param verdadero Booleano que indica si el botón representa una respuesta verdadera (true) o falsa (false).
+ * @param color El color que se aplicará al botón.
  */
 @Composable
-fun BotonRespuesta(verdadero: Boolean, color: Color) {
+fun BotonRespuesta(miModel: VModel, verdadero: Boolean, color: Color) {
     Button(
         onClick = {
-            if (!juegoIniciado) return@Button
-            if (fraseActual.value.verdadero == verdadero) {
-                fraseActual.value = frases.random() // Selecciona una nueva frase correcta
-                puntuacion++
-            } else {
-                fraseActual.value = frases.random() // Selecciona una nueva frase incorrecta
-            }
-        },
 
+            miModel.verificarRespuesta(verdadero)
+        },
         modifier = Modifier
             .padding(10.dp)
             .size(150.dp)
             .padding(8.dp), // Añadir padding para que se vean mejor los bordes redondeados
         shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp), // Agregar bordes redondeados
-
         colors = ButtonDefaults.buttonColors(color)
     ) {
         if (verdadero) {
             Text("V",
-                    color = Color.Black,
+                color = Color.Black,
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = 20.sp
             )
@@ -173,7 +125,8 @@ fun BotonRespuesta(verdadero: Boolean, color: Color) {
             Text("F",
                 color = Color.Black,
                 fontWeight = FontWeight.ExtraBold,
-                fontSize = 20.sp)
+                fontSize = 20.sp
+            )
         }
     }
 }
