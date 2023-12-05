@@ -1,9 +1,6 @@
 package com.marcos.examen4ddec
 
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -20,6 +17,27 @@ class VModel :ViewModel(){
         aux()
     }
 
+    fun resetGame() {
+        Data.juegoIniciado.value = false
+        Data.cuentaAtras.value = 20
+        Data.puntuacion.value = 0
+    }
+
+    /**
+     * Inicia el juego
+     */
+    fun iniciarJuego() {
+        Data.juegoIniciado.value = true
+        Data.fraseActual.value = Data.frases.random()
+        Data.juegoScope = CoroutineScope(Dispatchers.Default)
+        Data.juegoScope?.launch {
+            repeat(20) {
+                delay(1000)
+                Data.cuentaAtras.value--
+            }
+            Data.juegoIniciado.value = false
+        }
+    }
 
     fun verificarRespuesta(respuesta: Boolean) {
         if (!Data.juegoIniciado.value) return
@@ -33,7 +51,10 @@ class VModel :ViewModel(){
         }
     }
 
-
+    override fun onCleared() {
+        super.onCleared()
+        Data.juegoScope?.cancel()
+    }
 
     private fun aux() {
         // Introducir frases en la lista

@@ -1,5 +1,4 @@
-package com.marcos.myaplicationpractica
-
+package com.marcos.examen4ddec.ui.theme
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
